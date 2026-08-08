@@ -9,6 +9,14 @@
 /vendor/
 ###< symfony/framework-bundle ###
 
+###> local env files (use *.example as templates) ###
+.env
+.env.*
+!.env.example
+!.env.*.example
+###< local env files ###
+
+
 ###> phpunit/phpunit ###
 /phpunit.xml
 /.phpunit.cache/
