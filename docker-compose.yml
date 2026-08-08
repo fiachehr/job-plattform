@@ -1,0 +1,125 @@
+version: '3.9'
+
+services:
+
+  # ----------------------
+  # PostgreSQL
+  # ----------------------
+  db:
+    image: postgres:16
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "6543:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # ----------------------
+  # Redis
+  # ----------------------
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6479:6379"
+
+  # ----------------------
+  # Symfony (PHP)
+  # ----------------------
+  backend:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: backend
+    working_dir: /var/www
+    volumes:
+      - ./backend:/var/www
+    depends_on:
+      - db
+      - redis
+
+  # ----------------------
+  # Nginx
+  # ----------------------
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "9095:80"
+    volumes:
+      - ./backend:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - backend
+
+  # ----------------------
+  # Vue Admin Panel
+  # ----------------------
+  admin:
+    image: node:20
+    container_name: vue-admin
+    working_dir: /app
+    volumes:
+      - ./admin:/app
+    command: sh -c "npm install && npm run dev -- --host"
+    ports:
+      - "6173:5173"
+
+  # ----------------------
+  # Nuxt Frontend
+  # ----------------------
+  frontend:
+    image: node:20
+    container_name: nuxt
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    command: sh -c "npm install && npm run dev -- --host"
+    ports:
+      - "4851:3000"
+
+  # ----------------------
+  # n8n
+  # ----------------------
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    ports:
+      - "6789:5678"
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=db
+      - DB_POSTGRESDB_DATABASE=app
+      - DB_POSTGRESDB_USER=app
+      - DB_POSTGRESDB_PASSWORD=secret
+    depends_on:
+      - db
+
+  # ----------------------
+  # Adminer
+  # ----------------------
+  adminer:
+    image: adminer
+    container_name: adminer
+    ports:
+      - "9991:8080"
+
+  # ----------------------
+  # Keycloak
+  # ----------------------
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: keycloak
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "9093:8080"
+
+volumes:
+  postgres_data:

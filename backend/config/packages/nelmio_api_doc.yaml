@@ -1,0 +1,80 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: My App
+            description: This is an awesome app!
+            version: 1.0.0
+        paths:
+            /api/user/register:
+                post:
+                    tags: [User]
+                    summary: Register a new user
+                    requestBody:
+                        required: true
+                        content:
+                            application/json:
+                                schema:
+                                    type: object
+                                    required: [name, email, password]
+                                    properties:
+                                        name:
+                                            type: string
+                                            minLength: 2
+                                            maxLength: 255
+                                            example: Ali Ahmadi
+                                        email:
+                                            type: string
+                                            format: email
+                                            example: ali@example.com
+                                        password:
+                                            type: string
+                                            minLength: 8
+                                            example: Str0ng@Pass
+                                            description: Must contain uppercase, lowercase, number, and special character.
+                    responses:
+                        '201':
+                            description: User registered successfully
+                            content:
+                                application/json:
+                                    schema:
+                                        type: object
+                                        properties:
+                                            id:
+                                                type: string
+                                                example: uuid
+                                            name:
+                                                type: string
+                                                example: Ali Ahmadi
+                                            email:
+                                                type: string
+                                                format: email
+                                                example: ali@example.com
+                        '409':
+                            description: Email already exists
+                            content:
+                                application/json:
+                                    schema:
+                                        type: object
+                                        properties:
+                                            message:
+                                                type: string
+                                                example: Email already exists.
+                        '422':
+                            description: Validation error
+                            content:
+                                application/json:
+                                    schema:
+                                        type: object
+                                        properties:
+                                            message:
+                                                type: string
+                                                example: Validation failed.
+                                            errors:
+                                                type: object
+                                                example:
+                                                    email: ['This value is not a valid email address.']
+                        '500':
+                            description: Internal server error
+    areas: # to filter documented areas
+        path_patterns:
+            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc

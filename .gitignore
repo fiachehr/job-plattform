@@ -1,0 +1,24 @@
+# Environment files (keep *.example)
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# Dependencies / build
+**/node_modules/
+**/vendor/
+**/dist/
+**/.nuxt/
+**/.output/
+**/var/
+
+# JWT keys (generate locally — do not commit private key)
+**/config/jwt/*.pem
+!**/config/jwt/*.pem.example
